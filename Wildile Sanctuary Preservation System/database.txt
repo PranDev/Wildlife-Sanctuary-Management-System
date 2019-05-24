@@ -1,0 +1,32 @@
+create table Customers ( c_id integer , username varchar(30), password varchar(30), d_registration date,primary key (c_id));
+
+create table Sanctuaries (s_id integer, s_name varchar(30), location varchar(30), rating varchar(30),season varchar(30), primary key(s_id));
+
+create table Flights (f_id integer,s_id integer, Dept_location varchar(30), arr_location varchar(30), time_dept varchar(30), f_price integer, primary key (f_id), foreign key(s_id) references Sanctuaries(s_id));
+
+create table Hotels (h_id integer, s_id integer, h_name varchar(30), h_price integer,h_rating varchar(30), primary key (h_id),foreign key(s_id) references Sanctuaries(s_id));
+
+create table Services (serv_id integer, s_id integer, serv_name varchar(30),serv_price integer(30), primary key (serv_id),foreign key(s_id) references Sanctuaries(s_id));
+
+create table Admins (a_id integer, a_password varchar(30), primary key(a_id));
+
+create table F_Booking ( c_id integer, f_id integer, travel_date date, t_price integer,primary key(c_id, f_id), foreign key(c_id) references Customers(c_id), Foreign key(f_id) references Flights(f_id));
+
+create table H_Booking (c_id integer , h_id integer, n_rooms integer, d_checkin date, d_checkout date, stay_price integer,primary key(c_id, h_id), foreign key(c_id) references Customers(c_id), Foreign key(h_id) references Hotels(h_id));
+
+create table S_Booking (c_id integer, s_id integer, d_booking date, n_people integer,primary key(c_id, s_id), foreign key(c_id) references Customers(c_id), Foreign key(s_id) references Sanctuaries(s_id));
+
+create table Serv_Booking (c_id integer, serv_id integer, choice_serv_price integer, primary key (c_id,serv_id), foreign key(c_id) references Customers(c_id), Foreign key(serv_id) references Services(serv_id));
+
+create table Booking(b_id integer, c_id integer, p_method varchar(30), amount integer, primary key(b_id, c_id),foreign key(c_id) references Customers(c_id));
+
+create table itenarery (c_id integer, s_id integer ,f_id integer, h_id integer, total_amount integer,b_id integer, primary key (c_id,s_id,f_id,h_id,b_id),foreign key(c_id) references Customers(c_id), Foreign key(s_id) references Sanctuaries(s_id),Foreign key(f_id) references Flights(f_id), Foreign key(h_id) references Hotels(h_id), foreign key(b_id) references booking(b_id));
+
+create table Details (c_id integer, name varchar(30), sex varchar(10), age integer, phone_number integer, primary key(c_id,name),foreign key(c_id) references Customers(c_id));
+
+insert into Sanctuaries values (200,'High Garden', 'Reach',4,'Spring');
+insert into Sanctuaries values (201,'Sunspear', 'Dorne',3,'Winter');
+insert into Sanctuaries values (202,'Eyrie', 'Vale',3.5,'Fall');
+insert into Sanctuaries values (203,'Valeria', 'Essos',5,'Summer');
+
+

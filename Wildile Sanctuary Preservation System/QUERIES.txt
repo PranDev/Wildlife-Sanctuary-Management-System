@@ -1,0 +1,92 @@
+SELECT FLIGHT
+Select f_id,arr_location,dept_location,time_dept,f_price from flights where s_id = ? and dept_location=?
+
+SELECT HOTEL ACCORDING TO REQUIREMENTS
+Select h_id,h_name,h_price,h_rating from hotels where s_id = ? and h_id in (select h_id from hotels where h_price <= ?) and h_id in (select h_id from hotels where h_rating >= ?
+
+PROCEDURE TO CALCULATE DISCOUNT
+ delimiter //
+     create procedure p3 (IN cid int , IN bid int)
+     begin
+     declare
+     v1,v2 int;
+     select count(t) into v1 from
+     (select c_id as t from customers where c_id = 100 and c_id in (select distinct(b1.c_id) from booking b1
+     where exists (select b_id
+              from booking b2
+              where b2.c_id = b1.c_id
+              group by b2.c_id
+              having count(*) >2))) as fr;
+
+     Select count(t) into v2 from
+ (select c_id as t
+ from customers
+ where c_id = 100
+ and c_id in (select c_id 
+ from booking
+ where s_id = 203 and amount  >=  all( select amount from booking where s_id =203) )) as fro;
+
+
+     if (v1>0 and v2<1) then
+       update itenarery set total_amount = total_amount*0.95 where c_id = cid and b_id = bid;
+     elseif(v1<1 and v2>0) then
+       update itenarery set total_amount = total_amount*0.95 where c_id = cid and b_id = bid;
+     elseif (v1>0 and v2>0) then
+       update itenarery set total_amount = total_amount*0.90 where c_id = cid and b_id = bid;
+     end if;
+     end //
+     delimiter ;
+
+call p3(?,?)
+
+
+TRIGGER/PROCEDURE
+delimiter //
+create procedure p88 (IN cid int,IN bid int,IN amt int)
+begin
+declare fid,sid,hid int;
+DECLARE done INT DEFAULT FALSE;
+declare c1 cursor for select f_id from f_booking where c_id=cid;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+select h_id into hid from h_booking where c_id=cid;
+select s_id into sid from s_booking where c_id=cid;
+open c1;
+fetch c1 into fid;
+read_loop: loop
+insert into itenarery values(cid,sid,fid,hid,amt,bid);
+fetch c1 into fid;
+IF done THEN
+      LEAVE read_loop;
+END IF;
+end loop;
+close c1;
+end;
+// 
+delimiter ;
+
+
+TRIGGER
+
+delimiter //
+create trigger t1 
+after update on booking
+for each row
+begin
+call p88(new.c_id,new.b_id,new.amount);
+end;
+// delimiter;
+
+
+TO BOOK
+delimiter //
+     create procedure p99 (IN cid int, IN bid int, IN hid int, IN sid int ,IN fid1 int, IN fid2 int)
+     begin
+     declare
+     v1,v2,v3,v4 int;
+     select sum(t_price) into v1 from f_booking where c_id = cid and (f_id =fid1 or f_id = fid2);
+     select stay_price into v2 from h_booking where c_id = cid and h_id = hid;
+     select sum(choice_serv_price) into v3 from serv_booking natural join services where c_id = cid and s_id = sid;
+     set v4 =v1+v2+v3;
+     update booking set amount = v4 where c_id = cid and b_id = bid;
+     end //
+     delimiter ;
